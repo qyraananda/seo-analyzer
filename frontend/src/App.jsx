@@ -118,13 +118,12 @@ HEALTH SCORE  : ${data.score} / 100
   return (
     <div className="min-h-screen bg-[#F4F1EA] text-[#111111] font-sans flex flex-col antialiased selection:bg-black selection:text-white">
       
-      {/* ================= HEADER MENU (WARNA HIJAU PREMIUM) ================= */}
-      <header className="sticky top-0 z-50 bg-[#1A4329] text-white border-b-2 border-black px-4 md:px-12 py-4 flex justify-between items-center">
+      <header className="sticky top-0 z-50 bg-[#87e64b] text-black border-b-2 border-black px-4 md:px-12 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <span className="font-black text-xl tracking-tighter uppercase border-2 border-black px-2 py-0.5 bg-white text-[#1A4329]">
+          <span className="font-black text-xl tracking-tighter uppercase border-2 border-black px-2 py-0.5 bg-black text-[#87e64b]">
             CH
           </span>
-          <span className="font-extrabold text-lg tracking-tight uppercase hidden sm:inline text-white">
+          <span className="font-extrabold text-lg tracking-tight uppercase hidden sm:inline text-black">
             CauseSEO Engine
           </span>
         </div>
@@ -138,25 +137,24 @@ HEALTH SCORE  : ${data.score} / 100
               setError('');
               document.getElementById('analyzer')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="hover:underline transition-all cursor-pointer bg-transparent border-none p-0 font-bold uppercase tracking-wider text-white"
+            className="hover:underline transition-all cursor-pointer bg-transparent border-none p-0 font-bold uppercase tracking-wider text-black"
           >
             Analyzer
           </button>
           <button 
             onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-gray-300 hover:text-white hover:underline transition-all cursor-pointer bg-transparent border-none p-0 font-bold uppercase tracking-wider"
+            className="text-gray-800 hover:text-black hover:underline transition-all cursor-pointer bg-transparent border-none p-0 font-bold uppercase tracking-wider"
           >
             Features
           </button>
           <button 
             onClick={() => document.getElementById('analyzer')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-white text-[#1A4329] px-4 py-1.5 border border-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_#000] text-xs md:text-sm font-bold uppercase tracking-wider cursor-pointer"
+            className="bg-black text-[#87e64b] px-4 py-1.5 border border-black hover:bg-white hover:text-black transition-all shadow-[2px_2px_0px_#000] text-xs md:text-sm font-bold uppercase tracking-wider cursor-pointer"
           >
             Run App
           </button>
         </nav>
       </header>
-
 
       {/* ================= MAIN CONTENT ================= */}
       <main id="analyzer" className="flex-1 w-full max-w-4xl mx-auto px-4 py-12 md:py-20 space-y-16">
@@ -507,22 +505,22 @@ HEALTH SCORE  : ${data.score} / 100
 
       </main>
 
-           {/* ================= FOOTER MENU (WARNA HIJAU PREMIUM) ================= */}
-      <footer className="bg-[#1A4329] text-white border-t-2 border-black px-6 md:px-12 py-12 mt-20">
+      {/* ================= FOOTER MENU (WARNA HIJAU NEO-BRUTALISM #87e64b) ================= */}
+      <footer className="bg-[#87e64b] text-black border-t-2 border-black px-6 md:px-12 py-12 mt-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
           
           <div className="space-y-3">
-            <p className="font-black text-lg tracking-tighter uppercase bg-white text-[#1A4329] inline-block px-2 py-0.5 border-2 border-black">
+            <p className="font-black text-lg tracking-tighter uppercase bg-black text-[#87e64b] inline-block px-2 py-0.5 border-2 border-black">
               CauseSEO
             </p>
-            <p className="text-xs text-gray-200 max-w-xs leading-relaxed">
+            <p className="text-xs text-gray-800 max-w-xs leading-relaxed font-medium">
               Sebuah platform digital audit terintegrasi yang menyatukan performa data, struktur semantik, dan kejelasan arsitektur web.
             </p>
           </div>
 
           <div className="space-y-2">
-            <h4 className="font-bold text-xs uppercase tracking-widest text-emerald-300">Core Services</h4>
-            <ul className="space-y-1 text-xs text-gray-100 font-medium">
+            <h4 className="font-black text-xs uppercase tracking-widest text-black border-b border-black pb-0.5 inline-block">Core Services</h4>
+            <ul className="space-y-1 text-xs text-gray-900 font-bold">
               <li><a href="#analyzer" className="hover:underline">On-Page Spider</a></li>
               <li><a href="#analyzer" className="hover:underline">Keyword Density Scanner</a></li>
               <li><a href="#analyzer" className="hover:underline">Metadata Health Metrics</a></li>
@@ -530,8 +528,8 @@ HEALTH SCORE  : ${data.score} / 100
           </div>
 
           <div className="space-y-2">
-            <h4 className="font-bold text-xs uppercase tracking-widest text-emerald-300">References</h4>
-            <ul className="space-y-1 text-xs text-gray-100 font-medium">
+            <h4 className="font-black text-xs uppercase tracking-widest text-black border-b border-black pb-0.5 inline-block">References</h4>
+            <ul className="space-y-1 text-xs text-gray-900 font-bold">
               <li><a href="https://causehouse.co" target="_blank" rel="noreferrer" className="hover:underline">About Studio Style</a></li>
               <li><a href="https://tailwindcss.com" target="_blank" rel="noreferrer" className="hover:underline">Tailwind Framework</a></li>
               <li><a href="https://react.dev" target="_blank" rel="noreferrer" className="hover:underline">React Client Architecture</a></li>
@@ -539,11 +537,11 @@ HEALTH SCORE  : ${data.score} / 100
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto border-t border-emerald-800 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-emerald-100 font-medium gap-4">
+        <div className="max-w-6xl mx-auto border-t border-black mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-gray-900 font-bold gap-4">
           <p>© 2026 CauseSEO Engine. All rights reserved. Built for mission-driven web optimization.</p>
           <div className="flex gap-4 uppercase tracking-wider text-[10px]">
-            <a href="https://causehouse.co" target="_blank" rel="noreferrer" className="hover:underline text-emerald-200">Privacy</a>
-            <a href="https://causehouse.co" target="_blank" rel="noreferrer" className="hover:underline text-emerald-200">Terms of Use</a>
+            <a href="https://causehouse.co" target="_blank" rel="noreferrer" className="hover:underline text-black">Privacy</a>
+            <a href="https://causehouse.co" target="_blank" rel="noreferrer" className="hover:underline text-black">Terms of Use</a>
           </div>
         </div>
       </footer>
