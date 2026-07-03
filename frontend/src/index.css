@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "Courier New", Courier, monospace;
+}
+
+body {
+  margin: 0;
+  image-rendering: pixelated;
+}
