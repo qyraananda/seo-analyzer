@@ -2,10 +2,118 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const colorString = require('color-string');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+
+// Konfigurasi penyimpanan memori untuk Multer (aman untuk Docker)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // Batasi maksimal ukuran gambar 5MB
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|webp/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (mimetype && extname) return cb(null, true);
+        cb('Error: Hanya file gambar (JPG, PNG, WEBP) yang diizinkan!');
+    }
+});
+
+// --- ROUTE BARU: ANALISIS GAMBAR UNTUK SEO ---
+app.post('/api/analyze-image', upload.single('seo_image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'Silakan unggah satu file gambar terlebih dahulu.' });
+    }
+
+    try {
+        const file = req.file;
+        const originalName = file.originalname;
+        const fileSizeKB = (file.buffer.length / 1024).toFixed(2);
+        const extension = path.extname(originalName).toLowerCase().replace('.', '');
+
+        // --- VALIDASI PARAMETER SEO GAMBAR ---
+        let imageScore = 100;
+        let recommendations = [];
+
+        // 1. Validasi Ukuran File (Disarankan < 200KB untuk web cepat)
+        if (fileSizeKB > 200) {
+            imageScore -= 30;
+            recommendations.push('Kompres gambar di bawah 200KB. Ukuran saat ini terlalu besar dan berpotensi memperlambat LCP (Largest Contentful Paint).');
+        }
+
+        // 2. Validasi Penamaan File (Harus deskriptif, tidak boleh spasi, disarankan pakai tanda hubung -)
+        const hasSpaces = /\s/g.test(originalName);
+        const isGenericName = /^(image|img|photo|screenshot|dsc|untitled)/i.test(originalName);
+        
+        if (hasSpaces || isGenericName) {
+            imageScore -= 30;
+            recommendations.push('Ubah nama file menjadi deskriptif menggunakan huruf kecil dan tanda hubung (Contoh: "sepatu-lari-pria.png"). Hindari spasi atau nama bawaan kamera.');
+        }
+
+        // 3. Validasi Format Kontemporer (Disarankan WebP)
+        if (extension !== 'webp') {
+            imageScore -= 20;
+            recommendations.push('Konversi format gambar ke WebP atau AVIF untuk menghemat bandwidth server dan mempercepat pemuatan halaman.');
+        }
+
+        // Sugesti Teks Alternatif Otomatis Berdasarkan Nama File
+        const suggestedAlt = originalName
+            .replace(path.extname(originalName), '')
+            .replace(/[-_]/g, ' ')
+            .trim();
+
+        return res.json({
+            fileName: originalName,
+            fileSize: `${fileSizeKB} KB`,
+            format: extension.toUpperCase(),
+            score: Math.max(0, imageScore),
+            suggestedAltText: suggestedAlt || 'deskripsi-gambar',
+            recommendations: recommendations.length > 0 ? recommendations : ['✓ Selamat! Aset gambar Anda telah dioptimasi dengan sempurna untuk SEO.']
+        });
+
+    } catch (error) {
+        console.error('[IMAGE ERROR]:', error);
+        return res.status(500).json({ error: 'Gagal menganalisis berkas gambar.' });
+    }
+});
+
+// --- PERBAIKAN FUNGSI MATEMATIKA UNTUK RASIO KONTRAS (WCAG 2.0) ---
+function getLuminance(r, g, b) {
+    const a = [r, g, b].map((v) => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+function calculateContrast(color1, color2) {
+    try {
+        // PERBAIKAN: Gunakan metode penguraian .get.rgb() yang valid
+        const c1 = colorString.get.rgb(color1);
+        const c2 = colorString.get.rgb(color2);
+
+        // Pengaman jika format warna CSS web target tidak standar atau gagal urai
+        if (!c1 || !c2) return 5.0; 
+
+        const lum1 = getLuminance(c1[0], c1[1], c1[2]);
+        const lum2 = getLuminance(c2[0], c2[1], c2[2]);
+
+        const brightest = Math.max(lum1, lum2);
+        const darkest = Math.min(lum1, lum2);
+
+        return (brightest + 0.05) / (darkest + 0.05);
+    } catch (e) {
+        // Fallback aman agar jika terjadi error, skrip crawling tidak mandek
+        return 5.0; 
+    }
+}
+
 
 app.post('/api/analyze', async (req, res) => {
     const { url, keyword } = req.body;
@@ -20,22 +128,19 @@ app.post('/api/analyze', async (req, res) => {
             targetUrl = 'https://' + targetUrl;
         }
 
-        // PERBAIKAN 1: Gunakan User-Agent Chrome asli agar tidak dicurigai sebagai bot jahat
         const response = await axios.get(targetUrl, {
             headers: { 
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5'
             },
-            timeout: 6000 // Batas waktu tunggu maksimal 6 detik
+            timeout: 6000
         }).catch(err => {
-            // PERBAIKAN 2: Lempar string pesan error kustom, bukan objek Error mentah
             if (err.code === 'ENOTFOUND') throw 'Domain tidak ditemukan atau alamat DNS tidak valid.';
             if (err.code === 'ECONNABORTED') throw 'Waktu koneksi habis. Server target memproses terlalu lambat.';
             throw 'Akses ditolak atau gagal memuat data dari server target.';
         });
 
-               const $ = cheerio.load(response.data);
+        const $ = cheerio.load(response.data);
         
         const title = $('title').text().trim() || '❌ Tidak ditemukan';
         const description = $('meta[name="description"]').attr('content')?.trim() || '❌ Tidak ditemukan';
@@ -52,21 +157,17 @@ app.post('/api/analyze', async (req, res) => {
             if (!$(el).attr('alt')) missingAlt++;
         });
 
-        // --- FITUR BARU: PELACAKAN NAVIGASI HEADER & SUB-MENU ---
+        // --- TRACKING HEADER NAVIGATION ---
         let navigationLinks = [];
         let hasSubmenus = false;
-
-        // Cari elemen navigasi utama di dalam header, nav, atau ul kelas menu
         $('header nav, nav, ul[class*="menu"], ul[class*="nav"]').first().each((_, navElement) => {
-            // Cari semua item daftar (list item) tingkat pertama
             $(navElement).find('> ul > li, > li, flex > a').each((_, liElement) => {
                 const mainAnchor = $(liElement).find('> a').first();
-                const mainText = mainAnchor.text().trim() || $(liElement).text().trim().split('\n')[0];
+                const mainText = mainAnchor.text().trim();
                 const mainHref = mainAnchor.attr('href') || '#';
 
                 if (mainText) {
                     let subItems = [];
-                    // Cari apakah ada list bertingkat di dalamnya (Indikator Sub-Menu Dropdown)
                     $(liElement).find('ul li a, div a, ol li a').each((_, subAnchor) => {
                         const subText = $(subAnchor).text().trim();
                         const subHref = $(subAnchor).attr('href') || '#';
@@ -76,28 +177,38 @@ app.post('/api/analyze', async (req, res) => {
                         }
                     });
 
-                    navigationLinks.push({
-                        menu: mainText,
-                        href: mainHref,
-                        submenus: subItems
-                    });
+                    navigationLinks.push({ menu: mainText, href: mainHref, submenus: subItems });
                 }
             });
         });
 
-        // Jika pencarian nav structural pertama kosong, ambil semua link dari header sebagai fallback
         if (navigationLinks.length === 0) {
             $('header a').each((_, el) => {
                 const txt = $(el).text().trim();
                 const link = $(el).attr('href');
-                if (txt && navigationLinks.length < 6) { // Batasi 6 menu teratas
+                if (txt && navigationLinks.length < 6) {
                     navigationLinks.push({ menu: txt, href: link || '#', submenus: [] });
                 }
             });
         }
 
-        // --- AKHIR FITUR NAVIGASI ---
+        // --- FITUR BARU: DETEKSI WARNA & KONTRAS CSS ---
+        // Membaca inline style warna dari elemen body/main sebagai sampel data
+        const bodyStyle = $('body').attr('style') || '';
+        let bgColor = '#ffffff'; // default
+        let textColor = '#000000'; // default
 
+        const bgMatch = bodyStyle.match(/background-color:\s*([^;]+)/i);
+        const textMatch = bodyStyle.match(/[^a-z]color:\s*([^;]+)/i);
+
+        if (bgMatch) bgColor = bgMatch[1].trim();
+        if (textMatch) textColor = textMatch[1].trim();
+
+        // Hitung rasio kontras menggunakan rumus WCAG 2.0
+        const contrastRatio = calculateContrast(bgColor, textColor);
+        const isContrastAccessible = contrastRatio >= 4.5;
+
+        // --- KEYWORD DENSITY ---
         let keywordFoundInTitle = false;
         let keywordFoundInDesc = false;
         let keywordCountInBody = 0;
@@ -112,12 +223,13 @@ app.post('/api/analyze', async (req, res) => {
             keywordCountInBody = matches ? matches.length : 0;
         }
 
+        // --- KALKULASI SKOR AKHIR ---
         let score = 100;
         if (title === '❌ Tidak ditemukan' || title.length > 60) score -= 20;
         if (description === '❌ Tidak ditemukan' || description.length > 160) score -= 20;
         if (headings.h1.length !== 1) score -= 20;
         if (missingAlt > 0) score -= 20;
-        if (navigationLinks.length === 0) score -= 10; // Penalti jika tidak terdeteksi menu navigasi
+        if (!isContrastAccessible) score -= 10; // Penalti 10 poin jika kontras warna buruk untuk UX/SEO
 
         return res.json({
             url: targetUrl,
@@ -134,6 +246,12 @@ app.post('/api/analyze', async (req, res) => {
                 hasDropdowns: hasSubmenus ? 'YA (TERDETEKSI)' : 'TIDAK / FLAT NAV',
                 tree: navigationLinks
             },
+            colorContrast: {
+                background: bgColor,
+                text: textColor,
+                ratio: contrastRatio.toFixed(2),
+                accessible: isContrastAccessible ? 'LOLOS (BAGUS)' : 'GAGAL (BURUK)'
+            },
             keywordAnalysis: {
                 inTitle: keywordFoundInTitle ? 'YA (BAGUS)' : 'TIDAK',
                 inDesc: keywordFoundInDesc ? 'YA (BAGUS)' : 'TIDAK',
@@ -142,7 +260,6 @@ app.post('/api/analyze', async (req, res) => {
         });
 
     } catch (error) {
-        // PERBAIKAN 3: Pastikan jika ada error, server WAJIB merespons JSON agar frontend berhenti loading
         console.error('[SYSTEM ERROR]:', error);
         return res.status(500).json({ 
             error: typeof error === 'string' ? error : 'Gagal memproses data server target.' 
