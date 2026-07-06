@@ -3,7 +3,7 @@
 [![Build and Deploy to Docker](https://github.com)](https://github.com)
 [![Docker Hub/GHCR](https://shields.io)](https://github.com)
 
-SEO Engine adalah platform audit SEO *On-Page* mandiri (*Fullstack*) yang dirancang menggunakan estetika visual **Premium Neo-Brutalism** (terinspirasi dari CauseHouse) yang sepenuhnya responsif. Aplikasi ini memisahkan beban kerja antara engine *perayap* data (Backend) dan dasbor visual interaktif (Frontend) untuk memberikan analisis instan tanpa pelacak pihak ketiga.
+SEO Engine adalah platform audit SEO *On-Page* mandiri (*Fullstack*) yang dirancang menggunakan estetika visual **Premium Neo-Brutalism** yang sepenuhnya responsif. Aplikasi ini memisahkan beban kerja antara engine data (Backend) dan dasboard visual interaktif (Frontend) untuk memberikan analisis instan tanpa pelacak pihak ketiga.
 
 ---
 
@@ -71,22 +71,6 @@ docker compose up -d
 * **Frontend Container**: Berjalan di port internal `80` di belakang proxy.
 * **Backend Container**: Berjalan di port internal `5000` di belakang proxy.
 * **ACME Companion**: Otomatis memperbarui sertifikat SSL Let's Encrypt setiap 3 bulan secara mandiri tanpa *downtime*.
-
----
-
-## 🎛️ Konfigurasi GitHub Actions CI/CD Secrets
-
-Agar pipa otomatisasi `.github/workflows/deploy.yml` dapat berjalan dengan lancar saat Anda melakukan `git push`, pastikan Anda telah mendaftarkan variabel rahasia berikut pada menu **Settings ➔ Secrets and variables ➔ Actions** di repositori GitHub Anda:
-
-| Nama Kunci Rahasia | Deskripsi / Nilai Contoh |
-| :--- | :--- |
-| `PRODUCTION_API_URL` | URL publik API Backend Anda (misal: `https://domainanda.com`) |
-| `DOMAIN_FRONTEND` | Alamat domain untuk aplikasi utama (misal: `SEO.com`) |
-| `DOMAIN_BACKEND` | Alamat domain untuk endpoint server (misal: `://SEO.com`) |
-| `SSL_EMAIL` | Email aktif Anda untuk registrasi sertifikat Let's Encrypt |
-| `SERVER_HOST` | Alamat IP Publik server / VPS tujuan |
-| `SERVER_USER` | Username akses SSH server (misal: `root` atau `ubuntu`) |
-| `SERVER_SSH_KEY` | Isian teks Private Key SSH Anda (`~/.ssh/id_rsa`) |
 
 ---
 
