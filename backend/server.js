@@ -1,4 +1,5 @@
 const express = require('express');
+// const helmet = require('helmet');
 const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -10,6 +11,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// --- SUNTIKAN SECURITY HEADERS LANGSUNG DI LEVEL NODE.JS BACKEND ---
+app.use((req, res, next) => {
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    next();
+});
 
 // Konfigurasi penyimpanan memori untuk Multer (aman untuk Docker)
 const storage = multer.memoryStorage();

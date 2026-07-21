@@ -107,7 +107,7 @@ function App() {
       <header className="sticky top-0 z-50 bg-[#87e64b] text-black border-b-2 border-black px-4 md:px-12 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="font-black text-xl tracking-tighter uppercase border-2 border-black px-2 py-0.5 bg-black text-[#87e64b]">
-            CH
+            SEO
           </span>
           <span className="font-extrabold text-lg tracking-tight uppercase hidden sm:inline text-black">
             SEO Engine
@@ -117,7 +117,7 @@ function App() {
         <nav className="flex items-center gap-2 md:gap-4 text-xs md:text-sm font-bold uppercase tracking-wider">
           {/* TAB 1: DOMAIN ANALYZER */}
           <div className="relative group px-4 py-2">
-            <div className={`absolute inset-0 bg-white transition-opacity duration-150 z-0 ${activeTab === 'domain' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ clipPath: 'polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%)' }} />
+            <div className={`absolute inset-0 bg-white transition-opacity duration-150 z-0 ${activeTab === 'domain' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ clipPath: 'polygon(15% 0%, 100% 20%, 85% 100%, 0% 100%)' }} />
             <button 
               onClick={() => { setActiveTab('domain'); setError(''); }}
               className="relative z-10 text-black font-black uppercase tracking-wider cursor-pointer bg-transparent border-none p-0"
@@ -137,6 +137,7 @@ function App() {
             </button>
           </div>
 
+          
           <button 
             onClick={() => { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}
             className="text-gray-800 hover:text-black font-black uppercase tracking-wider cursor-pointer bg-transparent border-none p-0 hidden md:inline ml-2"
@@ -147,7 +148,7 @@ function App() {
           <button 
             onClick={() => { document.getElementById('main-workspace')?.scrollIntoView({ behavior: 'smooth' }); }}
             className="bg-black text-[#87e64b] px-7 py-2 font-black uppercase tracking-widest text-xs md:text-sm transition-all hover:bg-white hover:text-black cursor-pointer border-none ml-2"
-            style={{ clipPath: 'polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%)' }}
+            style={{ clipPath: 'polygon(15% 0%, 100% 20%, 85% 100%, 0% 100%)' }}
           >
             Run App
           </button>
@@ -306,7 +307,7 @@ function App() {
 
                {/* ================= VIEW 2: IMAGE ANALYZER WORKSPACE ================= */}
         {activeTab === 'image' && (
-          <div className="space-y-12">
+          <div className="space-y-12" id="image-analyzer">
             <div className="bg-white border-2 border-black p-6 md:p-8 shadow-[6px_6px_0px_#111111]">
               <form onSubmit={handleImageAnalyze} className="space-y-6">
                 <div className="space-y-2">
@@ -420,8 +421,9 @@ function App() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto border-t border-black mt-8 pt-6 text-[11px] text-gray-900 font-bold">
-          <p>© 2026 SEO Engine. All rights reserved. Built for mission-driven web optimization.</p>
+          <p>&copy;{new Date().getFullYear()}  SEO Engine. All rights reserved. Built for mission-driven web optimization.</p>
         </div>
+        
       </footer>
     </div>
   );
